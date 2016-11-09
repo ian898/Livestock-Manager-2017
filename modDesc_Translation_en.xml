@@ -5,10 +5,10 @@
 		<text name="input_LM_TOGGLE" 	text="Toggle Livestock Manager UI" />
 		
 		<!-- Text -->
-		<text name="LM_CHICKEN_TITLE" 	text="Chicken // Condition: %s" />
-		<text name="LM_SHEEP_TITLE" 	text="Sheep // Condition: %s" />
-		<text name="LM_COW_TITLE" 		text="Cows // Condition: %s" />
-		<text name="LM_PIG_TITLE" 		text="Pigs // Condition: %s" />
+		<text name="LM_CHICKEN_TITLE" 	text="Chicken // Condition: %s%%" />
+		<text name="LM_SHEEP_TITLE" 	text="Sheep // Condition: %s%%" />
+		<text name="LM_COW_TITLE" 		text="Cows // Condition: %s%%" />
+		<text name="LM_PIG_TITLE" 		text="Pigs // Condition: %s%%" />
 		<text name="LM_NEEDS0" 			text="No Action Needed" />
 		<text name="LM_NEEDS1" 			text="- Fill Water" />
 		<text name="LM_NEEDS2" 			text="- Fill Feed" />
