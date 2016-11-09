@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<modDesc descVersion="30">
+<modDesc descVersion="32">
 	<author>Ian898 / CBModding</author>
 	<version>1.0.2.1</version>
 	<title>
@@ -13,66 +13,15 @@
 
 	<iconFilename>store.png</iconFilename>
 	<multiplayer supported="true" />
-
-	<l10n>
-		<text name="input_LM_TOGGLE">
-			<en>Toggle Livestock Manager UI</en>
-			<de>Toggle Vieh Manage UI</de>
-			<es>Alternar Panel Info</es>
-		</text>
-		<text name="LM_CHICKEN_TITLE">
-			<en>Chicken // Condition: </en>
-			<de>Hennen // Zustand: </de>
-			<es>Estado // Gallinas: </es>
-		</text>
-		<text name="LM_SHEEP_TITLE">
-			<en>Sheep // Condition: </en>
-			<de>Schaf // Zustand: </de>
-			<es>Estado // Ovejas: </es>
-		</text>
-		<text name="LM_COW_TITLE">
-			<en>Cows // Condition: </en>
-			<de>Kühen // Zustand: </de>
-			<es>Estado // Vacas: </es>
-		</text>
-		<text name="LM_PIG_TITLE">
-			<en>Pigs // Condition: </en>
-			<de>Schweine // Zustand: </de>
-			<es>Estado // Cerdos: </es>
-		</text>		 
-		<text name="LM_NEEDS0">
-			<en>No Action Needed</en>
-			<de>Keine Handlung nötig</de>
-			<es>No necesitan nada</es>
-		</text>
-		<text name="LM_NEEDS1">
-			<en>- Fill Water</en>
-			<de>- Füllen Sie Wasser</de>
-			<es>- Rellenar Agua</es>
-		</text>
-		<text name="LM_NEEDS2">
-			<en>- Fill Feed</en>
-			<de>- Füllen Feed</de>
-			<es>- Rellenar Comida</es>
-		</text>
-		<text name="LM_NEEDS3">
-			<en>- Place Straw</en>
-			<de>- Setzen Sie Stroh</de>
-			<es>- Echar Paja</es>
-		</text>
-		<text name="LM_NEEDS4">
-			<en>- Remove Manure</en>
-			<de>- entfernen Sie Dünger</de>
-			<es>- Retirar Estiércol</es>
-		</text>
-	</l10n>
-
+	
+	<l10n filenamePrefix="modDesc_Translation" />
+	
 	<extraSourceFiles>
 		<sourceFile filename="livestockManager.lua" />
 	</extraSourceFiles>
 	
 	<inputBindings>
-		<!--<input name="LM_TOGGLE" category="ONFOOT VEHICLE" key1="KEY_lshift KEY_KP_multiply" key2="" button="" device="0" mouse="" />-->
+		<!-- <input name="LM_TOGGLE" category="ONFOOT VEHICLE" key1="KEY_lshift KEY_KP_multiply" key2="" button="" device="0" mouse="" /> -->
 		<input name="LM_TOGGLE" category="ONFOOT VEHICLE" key1="KEY_KP_multiply" key2="" button="" device="0" mouse="" />
 	</inputBindings>
 </modDesc>
