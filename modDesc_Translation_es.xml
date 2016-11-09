@@ -5,10 +5,10 @@
 		<text name="input_LM_TOGGLE" 	text="Alternar Panel Info" />
 		
 		<!-- Text -->
-		<text name="LM_CHICKEN_TITLE" 	text="Estado // Gallinas: %s" />
-		<text name="LM_SHEEP_TITLE" 	text="Estado // Ovejas: %s" />
-		<text name="LM_COW_TITLE" 		text="Estado // Vacas: %s" />
-		<text name="LM_PIG_TITLE" 		text="Estado // Cerdos: %s" />
+		<text name="LM_CHICKEN_TITLE" 	text="Estado // Gallinas: %s%%" />
+		<text name="LM_SHEEP_TITLE" 	text="Estado // Ovejas: %s%%" />
+		<text name="LM_COW_TITLE" 		text="Estado // Vacas: %s%%" />
+		<text name="LM_PIG_TITLE" 		text="Estado // Cerdos: %s%%" />
 		<text name="LM_NEEDS0" 			text="No necesitan nada" />
 		<text name="LM_NEEDS1" 			text="- Rellenar Agua" />
 		<text name="LM_NEEDS2" 			text="- Rellenar Comida" />
