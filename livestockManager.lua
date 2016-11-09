@@ -4,18 +4,16 @@
 -- Date: 08/11/2016
 --
 
-local modDesc = loadXMLFile("modDesc", g_currentModDirectory .. "modDesc.xml");
-
 livestockManager = {};
-livestockManager.version = getXMLString(modDesc, "modDesc.version");
+livestockManager.version = ModsUtil.findModItemByModName(g_currentModName).version;
 livestockManager.modDirectory = g_currentModDirectory;
+
+livestockManager.IS_DEV = true;
 
 addModEventListener(livestockManager);
 
 function livestockManager:loadMap()
-	
-	self.isDev = true;
-	if self.isDev then
+	if livestockManager.IS_DEV then
 		print("");
 		print("-- Livestock Manager v" .. self.version .. ", author: Ian898 / CBModding --");
 		print("-- WARNING : You have Livestock Manager Development Edition installed,");
@@ -112,14 +110,21 @@ function livestockManager:loadMap()
 			
 	self.night_temp = 10;	
 	
-	livestockManager:loadSettings();	
+	-- Only load settings if your host/owner
+	if g_currentMission:getIsServer() then
+		-- Only if valid save game
+		if g_currentMission.missionInfo.isValid then
+			livestockManager:loadSettings();
+		end;	
+	end;
+	
 	g_currentMission.livestockManager = self;
 end;
 
 function livestockManager:update(dt)
 	
 	if g_currentMission:getIsServer() then
-
+-- doing input here renders it to only work in SP or for host in MP
 		if InputBinding.hasEvent(InputBinding.LM_TOGGLE) then
 			self.hud.active =not self.hud.active;
 		end;	
@@ -643,270 +648,264 @@ function livestockManager:draw()
 		end;
 
 		renderOverlay(self.hud.overlay, posX - 0.005, posY - (posOffsetY), 0.12, (posOffsetY + 0.022));	
-	
+		
+		-- clean up after us, text render after this will be affected otherwise.
+		setTextColor(1, 1, 1, 1);
+		setTextBold(false);
 	end;
 end;
 
 function livestockManager:loadSettings()
+	local path = ('%ssavegame%d/'):format(getUserProfileAppPath(), g_careerScreen.currentSavegame.savegameIndex);
+	local xml;
+	local file = path .. 'livestockManager.xml';
 
-	if g_currentMission:getIsServer() then
-	
-		local path = ('%ssavegame%d/'):format(getUserProfileAppPath(), g_careerScreen.currentSavegame.savegameIndex);
-		local xml;
-		local file = path .. 'livestockManager.xml';
-		
-		if fileExists(file) then
-			xml = loadXMLFile("livestockManagerState", file, "livestockManager");
-			
-			-- Load Hud Positions
-			local hudPosX = getXMLFloat(xml, "livestockManager.hud.posX");
-			if hudPosX ~= nil then
-				self.hud.posX = hudPosX;
-			end;
-			
-			local hudPosY = getXMLFloat(xml, "livestockManager.hud.posY");
-			if hudPosY ~= nil then
-				self.hud.posY = hudPosY;
-			end;
-			
-			-- Load Pig Settings
-			
-			local EnableBreeding = getXMLBool(xml, "livestockManager.pig.enableBreeding");
-			if EnableBreeding ~= nil then
-				self.animals.pig.enableBreeding = EnableBreeding;
-			end;
-			
-			local EnableDieing = getXMLBool(xml, "livestockManager.pig.enableDieing");
-			if EnableDieing ~= nil then
-				self.animals.pig.enableDieing = EnableDieing;
-			end;
-			
-			local ChildLimit = getXMLFloat(xml, "livestockManager.pig.childLimit");
-			if ChildLimit ~= nil then
-				self.animals.pig.childLimit = ChildLimit;
-			end;
-			
-			local BreedingLimit = getXMLFloat(xml, "livestockManager.pig.breedingLimit");
-			if BreedingLimit ~= nil then
-				self.animals.pig.breedingLimit = BreedingLimit;
-			end;
-			
-			local BreedingRate = getXMLFloat(xml, "livestockManager.pig.breedingDays");
-			if BreedingRate ~= nil then
-				self.animals.pig.breedingRate = BreedingRate * 96;
-			end;
-			
-			local Condition = getXMLFloat(xml, "livestockManager.pig.condition");
-			if Condition ~= nil then
-				self.animals.pig.condition = Condition;
-			end;
-			
-			local BreedingChance = getXMLFloat(xml, "livestockManager.pig.breedingTimer");
-			if BreedingChance ~= nil then
-				self.animals.pig.breedingChance = BreedingChance;
-			end;		
-			
-			local DeathChance = getXMLFloat(xml, "livestockManager.pig.deathTimer");
-			if DeathChance ~= nil then
-				self.animals.pig.deathChance = DeathChance;
-			end;
-			
-			local ManureMax = getXMLFloat(xml, "livestockManager.pig.manureMax");
-			if ManureMax ~= nil then
-				self.animals.pig.manureMax = ManureMax;
-			end;
-			
-			-- Load Cow Settings
-			
-			local EnableBreeding = getXMLBool(xml, "livestockManager.cow.enableBreeding");
-			if EnableBreeding ~= nil then
-				self.animals.cow.enableBreeding = EnableBreeding;
-			end;
-			
-			local EnableDieing = getXMLBool(xml, "livestockManager.cow.enableDieing");
-			if EnableDieing ~= nil then
-				self.animals.cow.enableDieing = EnableDieing;
-			end;
-			
-			local ChildLimit = getXMLFloat(xml, "livestockManager.cow.childLimit");
-			if ChildLimit ~= nil then
-				self.animals.cow.childLimit = ChildLimit;
-			end;
-			
-			local BreedingLimit = getXMLFloat(xml, "livestockManager.cow.breedingLimit");
-			if BreedingLimit ~= nil then
-				self.animals.cow.breedingLimit = BreedingLimit;
-			end;
-			
-			local BreedingRate = getXMLFloat(xml, "livestockManager.cow.breedingDays");
-			if BreedingRate ~= nil then
-				self.animals.cow.breedingRate = BreedingRate * 96;
-			end;
-			
-			local Condition = getXMLFloat(xml, "livestockManager.cow.condition");
-			if Condition ~= nil then
-				self.animals.cow.condition = Condition;
-			end;
-			
-			local BreedingChance = getXMLFloat(xml, "livestockManager.cow.breedingTimer");
-			if BreedingChance ~= nil then
-				self.animals.cow.breedingChance = BreedingChance;
-			end;		
-			
-			local DeathChance = getXMLFloat(xml, "livestockManager.cow.deathTimer");
-			if DeathChance ~= nil then
-				self.animals.cow.deathChance = DeathChance;
-			end;
-			
-			local ManureMax = getXMLFloat(xml, "livestockManager.cow.manureMax");
-			if ManureMax ~= nil then
-				self.animals.cow.manureMax = ManureMax;
-			end;
-			
-			-- Load Sheep Settings
-			
-			local EnableBreeding = getXMLBool(xml, "livestockManager.sheep.enableBreeding");
-			if EnableBreeding ~= nil then
-				self.animals.sheep.enableBreeding = EnableBreeding;
-			end;
-			
-			local EnableDieing = getXMLBool(xml, "livestockManager.sheep.enableDieing");
-			if EnableDieing ~= nil then
-				self.animals.sheep.enableDieing = EnableDieing;
-			end;
-			
-			local ChildLimit = getXMLFloat(xml, "livestockManager.sheep.childLimit");
-			if ChildLimit ~= nil then
-				self.animals.sheep.childLimit = ChildLimit;
-			end;
-			
-			local BreedingLimit = getXMLFloat(xml, "livestockManager.sheep.breedingLimit");
-			if BreedingLimit ~= nil then
-				self.animals.sheep.breedingLimit = BreedingLimit;
-			end;
-			
-			local BreedingRate = getXMLFloat(xml, "livestockManager.sheep.breedingDays");
-			if BreedingRate ~= nil then
-				self.animals.sheep.breedingRate = BreedingRate * 96;
-			end;
-			
-			local Condition = getXMLFloat(xml, "livestockManager.sheep.condition");
-			if Condition ~= nil then
-				self.animals.sheep.condition = Condition;
-			end;		
-			
-			local BreedingChance = getXMLFloat(xml, "livestockManager.sheep.breedingTimer");
-			if BreedingChance ~= nil then
-				self.animals.sheep.breedingChance = BreedingChance;
-			end;	
-			
-			local DeathChance = getXMLFloat(xml, "livestockManager.sheep.deathTimer");
-			if DeathChance ~= nil then
-				self.animals.sheep.deathChance = DeathChance;
-			end;
+	if fileExists(file) then
+		xml = loadXMLFile("livestockManagerState", file, "livestockManager");
 
-
-			-- Load Chicken Settings
-			
-			local EnableBreeding = getXMLBool(xml, "livestockManager.chicken.enableBreeding");
-			if EnableBreeding ~= nil then
-				self.animals.chicken.enableBreeding = EnableBreeding;
-			end;
-			
-			local EnableDieing = getXMLBool(xml, "livestockManager.chicken.enableDieing");
-			if EnableDieing ~= nil then
-				self.animals.chicken.enableDieing = EnableDieing;
-			end;
-			
-			local ChildLimit = getXMLFloat(xml, "livestockManager.chicken.childLimit");
-			if ChildLimit ~= nil then
-				self.animals.chicken.childLimit = ChildLimit;
-			end;
-			
-			local BreedingLimit = getXMLFloat(xml, "livestockManager.chicken.breedingLimit");
-			if BreedingLimit ~= nil then
-				self.animals.chicken.breedingLimit = BreedingLimit;
-			end;
-			
-			local BreedingRate = getXMLFloat(xml, "livestockManager.chicken.breedingDays");
-			if BreedingRate ~= nil then
-				self.animals.chicken.breedingRate = BreedingRate * 96;
-			end;
-			
-			local Condition = getXMLFloat(xml, "livestockManager.chicken.condition");
-			if Condition ~= nil then
-				self.animals.chicken.condition = Condition;
-			end;
-			
-			local BreedingChance = getXMLFloat(xml, "livestockManager.chicken.breedingTimer");
-			if BreedingChance ~= nil then
-				self.animals.chicken.breedingChance = BreedingChance;
-			end;
-			
-			local DeathChance = getXMLFloat(xml, "livestockManager.chicken.deathTimer");
-			if DeathChance ~= nil then
-				self.animals.chicken.deathChance = DeathChance;
-			end;
-		
+		-- Load Hud Positions
+		local hudPosX = getXMLFloat(xml, "livestockManager.hud.posX");
+		if hudPosX ~= nil then
+			self.hud.posX = hudPosX;
 		end;
+
+		local hudPosY = getXMLFloat(xml, "livestockManager.hud.posY");
+		if hudPosY ~= nil then
+			self.hud.posY = hudPosY;
+		end;
+
+		-- Load Pig Settings
+
+		local EnableBreeding = getXMLBool(xml, "livestockManager.pig.enableBreeding");
+		if EnableBreeding ~= nil then
+			self.animals.pig.enableBreeding = EnableBreeding;
+		end;
+
+		local EnableDieing = getXMLBool(xml, "livestockManager.pig.enableDieing");
+		if EnableDieing ~= nil then
+			self.animals.pig.enableDieing = EnableDieing;
+		end;
+
+		local ChildLimit = getXMLFloat(xml, "livestockManager.pig.childLimit");
+		if ChildLimit ~= nil then
+			self.animals.pig.childLimit = ChildLimit;
+		end;
+
+		local BreedingLimit = getXMLFloat(xml, "livestockManager.pig.breedingLimit");
+		if BreedingLimit ~= nil then
+			self.animals.pig.breedingLimit = BreedingLimit;
+		end;
+
+		local BreedingRate = getXMLFloat(xml, "livestockManager.pig.breedingDays");
+		if BreedingRate ~= nil then
+			self.animals.pig.breedingRate = BreedingRate * 96;
+		end;
+
+		local Condition = getXMLFloat(xml, "livestockManager.pig.condition");
+		if Condition ~= nil then
+			self.animals.pig.condition = Condition;
+		end;
+
+		local BreedingChance = getXMLFloat(xml, "livestockManager.pig.breedingTimer");
+		if BreedingChance ~= nil then
+			self.animals.pig.breedingChance = BreedingChance;
+		end;		
+
+		local DeathChance = getXMLFloat(xml, "livestockManager.pig.deathTimer");
+		if DeathChance ~= nil then
+			self.animals.pig.deathChance = DeathChance;
+		end;
+
+		local ManureMax = getXMLFloat(xml, "livestockManager.pig.manureMax");
+		if ManureMax ~= nil then
+			self.animals.pig.manureMax = ManureMax;
+		end;
+
+		-- Load Cow Settings
+
+		local EnableBreeding = getXMLBool(xml, "livestockManager.cow.enableBreeding");
+		if EnableBreeding ~= nil then
+			self.animals.cow.enableBreeding = EnableBreeding;
+		end;
+
+		local EnableDieing = getXMLBool(xml, "livestockManager.cow.enableDieing");
+		if EnableDieing ~= nil then
+			self.animals.cow.enableDieing = EnableDieing;
+		end;
+
+		local ChildLimit = getXMLFloat(xml, "livestockManager.cow.childLimit");
+		if ChildLimit ~= nil then
+			self.animals.cow.childLimit = ChildLimit;
+		end;
+
+		local BreedingLimit = getXMLFloat(xml, "livestockManager.cow.breedingLimit");
+		if BreedingLimit ~= nil then
+			self.animals.cow.breedingLimit = BreedingLimit;
+		end;
+
+		local BreedingRate = getXMLFloat(xml, "livestockManager.cow.breedingDays");
+		if BreedingRate ~= nil then
+			self.animals.cow.breedingRate = BreedingRate * 96;
+		end;
+
+		local Condition = getXMLFloat(xml, "livestockManager.cow.condition");
+		if Condition ~= nil then
+			self.animals.cow.condition = Condition;
+		end;
+
+		local BreedingChance = getXMLFloat(xml, "livestockManager.cow.breedingTimer");
+		if BreedingChance ~= nil then
+			self.animals.cow.breedingChance = BreedingChance;
+		end;		
+
+		local DeathChance = getXMLFloat(xml, "livestockManager.cow.deathTimer");
+		if DeathChance ~= nil then
+			self.animals.cow.deathChance = DeathChance;
+		end;
+
+		local ManureMax = getXMLFloat(xml, "livestockManager.cow.manureMax");
+		if ManureMax ~= nil then
+			self.animals.cow.manureMax = ManureMax;
+		end;
+
+		-- Load Sheep Settings
+
+		local EnableBreeding = getXMLBool(xml, "livestockManager.sheep.enableBreeding");
+		if EnableBreeding ~= nil then
+			self.animals.sheep.enableBreeding = EnableBreeding;
+		end;
+
+		local EnableDieing = getXMLBool(xml, "livestockManager.sheep.enableDieing");
+		if EnableDieing ~= nil then
+			self.animals.sheep.enableDieing = EnableDieing;
+		end;
+
+		local ChildLimit = getXMLFloat(xml, "livestockManager.sheep.childLimit");
+		if ChildLimit ~= nil then
+			self.animals.sheep.childLimit = ChildLimit;
+		end;
+
+		local BreedingLimit = getXMLFloat(xml, "livestockManager.sheep.breedingLimit");
+		if BreedingLimit ~= nil then
+			self.animals.sheep.breedingLimit = BreedingLimit;
+		end;
+
+		local BreedingRate = getXMLFloat(xml, "livestockManager.sheep.breedingDays");
+		if BreedingRate ~= nil then
+			self.animals.sheep.breedingRate = BreedingRate * 96;
+		end;
+
+		local Condition = getXMLFloat(xml, "livestockManager.sheep.condition");
+		if Condition ~= nil then
+			self.animals.sheep.condition = Condition;
+		end;		
+
+		local BreedingChance = getXMLFloat(xml, "livestockManager.sheep.breedingTimer");
+		if BreedingChance ~= nil then
+			self.animals.sheep.breedingChance = BreedingChance;
+		end;	
+
+		local DeathChance = getXMLFloat(xml, "livestockManager.sheep.deathTimer");
+		if DeathChance ~= nil then
+			self.animals.sheep.deathChance = DeathChance;
+		end;
+
+
+		-- Load Chicken Settings
+
+		local EnableBreeding = getXMLBool(xml, "livestockManager.chicken.enableBreeding");
+		if EnableBreeding ~= nil then
+			self.animals.chicken.enableBreeding = EnableBreeding;
+		end;
+
+		local EnableDieing = getXMLBool(xml, "livestockManager.chicken.enableDieing");
+		if EnableDieing ~= nil then
+			self.animals.chicken.enableDieing = EnableDieing;
+		end;
+
+		local ChildLimit = getXMLFloat(xml, "livestockManager.chicken.childLimit");
+		if ChildLimit ~= nil then
+			self.animals.chicken.childLimit = ChildLimit;
+		end;
+
+		local BreedingLimit = getXMLFloat(xml, "livestockManager.chicken.breedingLimit");
+		if BreedingLimit ~= nil then
+			self.animals.chicken.breedingLimit = BreedingLimit;
+		end;
+
+		local BreedingRate = getXMLFloat(xml, "livestockManager.chicken.breedingDays");
+		if BreedingRate ~= nil then
+			self.animals.chicken.breedingRate = BreedingRate * 96;
+		end;
+
+		local Condition = getXMLFloat(xml, "livestockManager.chicken.condition");
+		if Condition ~= nil then
+			self.animals.chicken.condition = Condition;
+		end;
+
+		local BreedingChance = getXMLFloat(xml, "livestockManager.chicken.breedingTimer");
+		if BreedingChance ~= nil then
+			self.animals.chicken.breedingChance = BreedingChance;
+		end;
+
+		local DeathChance = getXMLFloat(xml, "livestockManager.chicken.deathTimer");
+		if DeathChance ~= nil then
+			self.animals.chicken.deathChance = DeathChance;
+		end;
+
 	end;
 end;
 
 function livestockManager:saveSettings()
+	local path = ('%ssavegame%d/'):format(getUserProfileAppPath(), g_careerScreen.currentSavegame.savegameIndex);
+	local xml;
+	local file = path .. 'livestockManager.xml';
 
-	if g_currentMission:getIsServer() then
-	
-		local path = ('%ssavegame%d/'):format(getUserProfileAppPath(), g_careerScreen.currentSavegame.savegameIndex);
-		local xml;
-		local file = path .. 'livestockManager.xml';
-		
-		xml = createXMLFile("livestockManagerState", file, "livestockManager");
-		
-		setXMLFloat(xml, "livestockManager.hud.posX", g_currentMission.livestockManager.hud.posX);
-		setXMLFloat(xml, "livestockManager.hud.posY", g_currentMission.livestockManager.hud.posY);
-		
-		setXMLBool(xml, "livestockManager.pig.enableBreeding", g_currentMission.livestockManager.animals.pig.enableBreeding);
-		setXMLBool(xml, "livestockManager.pig.enableDieing", g_currentMission.livestockManager.animals.pig.enableDieing);
-		setXMLInt(xml, "livestockManager.pig.childLimit", g_currentMission.livestockManager.animals.pig.childLimit);
-		setXMLInt(xml, "livestockManager.pig.breedingLimit", g_currentMission.livestockManager.animals.pig.breedingLimit);
-		setXMLString(xml, "livestockManager.pig.breedingDays", string.format("%.2f",(g_currentMission.livestockManager.animals.pig.breedingRate / 96)));
-		setXMLInt(xml, "livestockManager.pig.condition", g_currentMission.livestockManager.animals.pig.condition);
-		setXMLInt(xml, "livestockManager.pig.breedingTimer", g_currentMission.livestockManager.animals.pig.breedingChance);
-		setXMLInt(xml, "livestockManager.pig.deathTimer", g_currentMission.livestockManager.animals.pig.deathChance);
-		setXMLInt(xml, "livestockManager.pig.manureMax", g_currentMission.livestockManager.animals.pig.manureMax);
-		
-		setXMLBool(xml, "livestockManager.cow.enableBreeding", g_currentMission.livestockManager.animals.cow.enableBreeding);
-		setXMLBool(xml, "livestockManager.cow.enableDieing", g_currentMission.livestockManager.animals.cow.enableDieing);
-		setXMLInt(xml, "livestockManager.cow.childLimit", g_currentMission.livestockManager.animals.pig.childLimit);
-		setXMLInt(xml, "livestockManager.cow.breedingLimit", g_currentMission.livestockManager.animals.cow.breedingLimit);
-		setXMLString(xml, "livestockManager.cow.breedingDays", string.format("%.2f",(g_currentMission.livestockManager.animals.cow.breedingRate / 96)));
-		setXMLInt(xml, "livestockManager.cow.condition", g_currentMission.livestockManager.animals.cow.condition);
-		setXMLInt(xml, "livestockManager.cow.breedingTimer", g_currentMission.livestockManager.animals.cow.breedingChance);
-		setXMLInt(xml, "livestockManager.cow.deathTimer", g_currentMission.livestockManager.animals.cow.deathChance);
-		setXMLInt(xml, "livestockManager.cow.manureMax", g_currentMission.livestockManager.animals.cow.manureMax);
-		
-		setXMLBool(xml, "livestockManager.sheep.enableBreeding", g_currentMission.livestockManager.animals.sheep.enableBreeding);
-		setXMLBool(xml, "livestockManager.sheep.enableDieing", g_currentMission.livestockManager.animals.sheep.enableDieing);
-		setXMLInt(xml, "livestockManager.sheep.childLimit", g_currentMission.livestockManager.animals.sheep.childLimit);
-		setXMLInt(xml, "livestockManager.sheep.breedingLimit", g_currentMission.livestockManager.animals.sheep.breedingLimit);
-		setXMLString(xml, "livestockManager.sheep.breedingDays", string.format("%.2f",(g_currentMission.livestockManager.animals.sheep.breedingRate / 96)));
-		setXMLInt(xml, "livestockManager.sheep.condition", g_currentMission.livestockManager.animals.sheep.condition);
-		setXMLInt(xml, "livestockManager.sheep.breedingTimer", g_currentMission.livestockManager.animals.sheep.breedingChance);
-		setXMLInt(xml, "livestockManager.sheep.deathTimer", g_currentMission.livestockManager.animals.sheep.deathChance);
-		
-		setXMLBool(xml, "livestockManager.chicken.enableBreeding", g_currentMission.livestockManager.animals.chicken.enableBreeding);
-		setXMLBool(xml, "livestockManager.chicken.enableDieing", g_currentMission.livestockManager.animals.chicken.enableDieing);
-		setXMLInt(xml, "livestockManager.chicken.childLimit", g_currentMission.livestockManager.animals.chicken.childLimit);
-		setXMLInt(xml, "livestockManager.chicken.breedingLimit", g_currentMission.livestockManager.animals.chicken.breedingLimit);
-		setXMLString(xml, "livestockManager.chicken.breedingDays", string.format("%.2f",(g_currentMission.livestockManager.animals.chicken.breedingRate / 96)));
-		setXMLInt(xml, "livestockManager.chicken.condition", g_currentMission.livestockManager.animals.chicken.condition);
-		setXMLInt(xml, "livestockManager.chicken.breedingTimer", g_currentMission.livestockManager.animals.chicken.breedingChance);
-		setXMLInt(xml, "livestockManager.chicken.deathTimer", g_currentMission.livestockManager.animals.chicken.deathChance);
-		
-		saveXMLFile(xml);
-		delete(xml);
-		
-	end;
+	xml = createXMLFile("livestockManagerState", file, "livestockManager");
+
+	setXMLFloat(xml, "livestockManager.hud.posX", g_currentMission.livestockManager.hud.posX);
+	setXMLFloat(xml, "livestockManager.hud.posY", g_currentMission.livestockManager.hud.posY);
+
+	setXMLBool(xml, "livestockManager.pig.enableBreeding", g_currentMission.livestockManager.animals.pig.enableBreeding);
+	setXMLBool(xml, "livestockManager.pig.enableDieing", g_currentMission.livestockManager.animals.pig.enableDieing);
+	setXMLInt(xml, "livestockManager.pig.childLimit", g_currentMission.livestockManager.animals.pig.childLimit);
+	setXMLInt(xml, "livestockManager.pig.breedingLimit", g_currentMission.livestockManager.animals.pig.breedingLimit);
+	setXMLString(xml, "livestockManager.pig.breedingDays", string.format("%.2f",(g_currentMission.livestockManager.animals.pig.breedingRate / 96)));
+	setXMLInt(xml, "livestockManager.pig.condition", g_currentMission.livestockManager.animals.pig.condition);
+	setXMLInt(xml, "livestockManager.pig.breedingTimer", g_currentMission.livestockManager.animals.pig.breedingChance);
+	setXMLInt(xml, "livestockManager.pig.deathTimer", g_currentMission.livestockManager.animals.pig.deathChance);
+	setXMLInt(xml, "livestockManager.pig.manureMax", g_currentMission.livestockManager.animals.pig.manureMax);
+
+	setXMLBool(xml, "livestockManager.cow.enableBreeding", g_currentMission.livestockManager.animals.cow.enableBreeding);
+	setXMLBool(xml, "livestockManager.cow.enableDieing", g_currentMission.livestockManager.animals.cow.enableDieing);
+	setXMLInt(xml, "livestockManager.cow.childLimit", g_currentMission.livestockManager.animals.pig.childLimit);
+	setXMLInt(xml, "livestockManager.cow.breedingLimit", g_currentMission.livestockManager.animals.cow.breedingLimit);
+	setXMLString(xml, "livestockManager.cow.breedingDays", string.format("%.2f",(g_currentMission.livestockManager.animals.cow.breedingRate / 96)));
+	setXMLInt(xml, "livestockManager.cow.condition", g_currentMission.livestockManager.animals.cow.condition);
+	setXMLInt(xml, "livestockManager.cow.breedingTimer", g_currentMission.livestockManager.animals.cow.breedingChance);
+	setXMLInt(xml, "livestockManager.cow.deathTimer", g_currentMission.livestockManager.animals.cow.deathChance);
+	setXMLInt(xml, "livestockManager.cow.manureMax", g_currentMission.livestockManager.animals.cow.manureMax);
+
+	setXMLBool(xml, "livestockManager.sheep.enableBreeding", g_currentMission.livestockManager.animals.sheep.enableBreeding);
+	setXMLBool(xml, "livestockManager.sheep.enableDieing", g_currentMission.livestockManager.animals.sheep.enableDieing);
+	setXMLInt(xml, "livestockManager.sheep.childLimit", g_currentMission.livestockManager.animals.sheep.childLimit);
+	setXMLInt(xml, "livestockManager.sheep.breedingLimit", g_currentMission.livestockManager.animals.sheep.breedingLimit);
+	setXMLString(xml, "livestockManager.sheep.breedingDays", string.format("%.2f",(g_currentMission.livestockManager.animals.sheep.breedingRate / 96)));
+	setXMLInt(xml, "livestockManager.sheep.condition", g_currentMission.livestockManager.animals.sheep.condition);
+	setXMLInt(xml, "livestockManager.sheep.breedingTimer", g_currentMission.livestockManager.animals.sheep.breedingChance);
+	setXMLInt(xml, "livestockManager.sheep.deathTimer", g_currentMission.livestockManager.animals.sheep.deathChance);
+
+	setXMLBool(xml, "livestockManager.chicken.enableBreeding", g_currentMission.livestockManager.animals.chicken.enableBreeding);
+	setXMLBool(xml, "livestockManager.chicken.enableDieing", g_currentMission.livestockManager.animals.chicken.enableDieing);
+	setXMLInt(xml, "livestockManager.chicken.childLimit", g_currentMission.livestockManager.animals.chicken.childLimit);
+	setXMLInt(xml, "livestockManager.chicken.breedingLimit", g_currentMission.livestockManager.animals.chicken.breedingLimit);
+	setXMLString(xml, "livestockManager.chicken.breedingDays", string.format("%.2f",(g_currentMission.livestockManager.animals.chicken.breedingRate / 96)));
+	setXMLInt(xml, "livestockManager.chicken.condition", g_currentMission.livestockManager.animals.chicken.condition);
+	setXMLInt(xml, "livestockManager.chicken.breedingTimer", g_currentMission.livestockManager.animals.chicken.breedingChance);
+	setXMLInt(xml, "livestockManager.chicken.deathTimer", g_currentMission.livestockManager.animals.chicken.deathChance);
+
+	saveXMLFile(xml);
+	delete(xml);
 end;
 g_careerScreen.saveSavegame = Utils.appendedFunction(g_careerScreen.saveSavegame, livestockManager.saveSettings);
 
