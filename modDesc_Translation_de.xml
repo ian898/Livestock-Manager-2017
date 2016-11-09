@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+	<texts>
+		<!-- inputbindings -->	
+		<text name="input_LM_TOGGLE" 	text="Toggle Vieh Manage UI" />
+		
+		<!-- Text -->
+		<text name="LM_CHICKEN_TITLE" 	text="Hennen // Zustand: %s" />
+		<text name="LM_SHEEP_TITLE" 	text="Schaf // Zustand: %s" />
+		<text name="LM_COW_TITLE" 		text="Kühen // Zustand: %s" />
+		<text name="LM_PIG_TITLE" 		text="Schweine // Zustand: %s" />
+		<text name="LM_NEEDS0" 			text="Keine Handlung nötig" />
+		<text name="LM_NEEDS1" 			text="- Füllen Sie Wasser" />
+		<text name="LM_NEEDS2" 			text="- Füllen Feed" />
+		<text name="LM_NEEDS3" 			text="- Setzen Sie Stroh" />
+		<text name="LM_NEEDS4" 			text="- entfernen Sie Dünger" />
+	</texts>
+</l10n>
