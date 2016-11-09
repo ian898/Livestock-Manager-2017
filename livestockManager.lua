@@ -553,106 +553,99 @@ function livestockManager:deaths(animalType, numAnimals)
 end;
 
 function livestockManager:draw()
-	
-	if g_currentMission:getIsServer() then
-	
-		if not self.hud.active then return end;
+	if not self.hud.active then return end;
 
-		local posX = g_currentMission.timeBgOverlay.x - self.hud.posX;
-		local posY = g_currentMission.timeBgOverlay.y + self.hud.posY;
-		
-		local posOffsetY = 0;
-		local fontSize = 0.013;
-		
-		setTextBold(true);
-		setTextColor(1,1,1,0.5);
-		setTextAlignment(RenderText.ALIGN_LEFT);
-		renderText(posX + 0.002, posY - posOffsetY, 0.016, "Livestock Manager 2017");
-		setTextBold(false);
+	local posX = g_currentMission.timeBgOverlay.x - self.hud.posX;
+	local posY = g_currentMission.timeBgOverlay.y + self.hud.posY;
 
-		posOffsetY = posOffsetY + 0.030;
-		
-		for _,animalType in ipairs(self.animals) do
-			
-			if self.animals[animalType].enableBreeding then
-				if g_currentMission.husbandries[animalType].animalDesc.birthRatePerDay ~= 0 then
-					g_currentMission.husbandries[animalType].animalDesc.birthRatePerDay = 0;
-				end;
-			end;
-			
-			local numAnimals = self.animal[animalType].numAnimals[0];
+	local posOffsetY = 0;
+	local fontSize = 0.013;
 
-			if numAnimals > 0 then
-				setTextBold(true);
-				if animalType == "chicken" then renderText(posX, posY - posOffsetY, fontSize, g_i18n:getText("LM_CHICKEN_TITLE") .. round(self.animals[animalType].condition) .. "%"); end;
-				if animalType == "sheep" then renderText(posX, posY - posOffsetY, fontSize, g_i18n:getText("LM_SHEEP_TITLE") .. round(self.animals[animalType].condition) .. "%"); end;
-				if animalType == "cow" then renderText(posX, posY - posOffsetY, fontSize, g_i18n:getText("LM_COW_TITLE") .. round(self.animals[animalType].condition) .. "%"); end;
-				if animalType == "pig" then renderText(posX, posY - posOffsetY, fontSize, g_i18n:getText("LM_PIG_TITLE") .. round(self.animals[animalType].condition) .. "%"); end;
-				setTextBold(false);
-				posOffsetY = posOffsetY + 0.016;	
-				
-				if not self.animals[animalType].states.water then
-					renderText(posX + 0.010, posY - posOffsetY, fontSize, g_i18n:getText("LM_NEEDS1"));	posOffsetY = posOffsetY + 0.016;
-				end;
-					
-				if not self.animals[animalType].states.feed then
-					renderText(posX + 0.010, posY - posOffsetY, fontSize, g_i18n:getText("LM_NEEDS2")); posOffsetY = posOffsetY + 0.016;
-				end;
-				
-				if not self.animals[animalType].states.bedding then
-					renderText(posX + 0.010, posY - posOffsetY, fontSize, g_i18n:getText("LM_NEEDS3").." ("..self.night_temp.." C)"); posOffsetY = posOffsetY + 0.016;
-				end;
-				
-				if self.animals[animalType].states.dirty then
-					renderText(posX + 0.010, posY - posOffsetY, fontSize, g_i18n:getText("LM_NEEDS4")); posOffsetY = posOffsetY + 0.016;
-				end;
-					
-				if self.animals[animalType].states.water and self.animals[animalType].states.feed and self.animals[animalType].states.bedding and not self.animals[animalType].states.dirty then
-					renderText(posX + 0.010, posY - posOffsetY, fontSize, g_i18n:getText("LM_NEEDS0")); posOffsetY = posOffsetY + 0.016;
-				end;		
+	setTextBold(true);
+	setTextColor(1,1,1,0.5);
+	setTextAlignment(RenderText.ALIGN_LEFT);
+	renderText(posX + 0.002, posY - posOffsetY, 0.016, "Livestock Manager 2017");
+	setTextBold(false);
+
+	posOffsetY = posOffsetY + 0.030;
+
+	for _,animalType in ipairs(self.animals) do
+
+		if self.animals[animalType].enableBreeding then
+			if g_currentMission.husbandries[animalType].animalDesc.birthRatePerDay ~= 0 then
+				g_currentMission.husbandries[animalType].animalDesc.birthRatePerDay = 0;
 			end;
 		end;
-		
-		if self.debug then
-			posOffsetY = posOffsetY + 0.008;
-			renderText(posX, posY - posOffsetY, fontSize - 0.003, "Debug Settings"); posOffsetY = posOffsetY + 0.016;
-			renderText(posX, posY - posOffsetY, fontSize - 0.003, "Update: "..math.ceil(self.updateMs/60000)); posOffsetY = posOffsetY + 0.016;
-			
-			renderText(posX, posY - posOffsetY, fontSize - 0.003, "Chickens: "); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Rate: "..math.ceil(self.animals.chicken.breedingRate)); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Condition: "..math.ceil(self.animals.chicken.condition)); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Chance: "..math.ceil(self.animals.chicken.breedingChance)); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Death Chance: "..math.ceil(self.animals.chicken.deathChance)); posOffsetY = posOffsetY + 0.016;
-			
-			renderText(posX, posY - posOffsetY, fontSize - 0.003, "Sheep: "); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Rate: "..math.ceil(self.animals.sheep.breedingRate)); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Condition: "..math.ceil(self.animals.sheep.condition)); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Chance: "..math.ceil(self.animals.sheep.breedingChance)); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Death Chance: "..math.ceil(self.animals.sheep.deathChance)); posOffsetY = posOffsetY + 0.016;
-			
-			renderText(posX, posY - posOffsetY, fontSize - 0.003, "Cows: "); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Rate: "..math.ceil(self.animals.cow.breedingRate)); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Condition: "..math.ceil(self.animals.cow.condition)); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Chance: "..math.ceil(self.animals.cow.breedingChance)); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Death Chance: "..math.ceil(self.animals.cow.deathChance)); posOffsetY = posOffsetY + 0.016;
-			
-			renderText(posX, posY - posOffsetY, fontSize - 0.003, "Pigs: "); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Rate: "..math.ceil(self.animals.pig.breedingRate)); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Condition: "..math.ceil(self.animals.pig.condition)); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Chance: "..math.ceil(self.animals.pig.breedingChance)); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Death Chance: "..math.ceil(self.animals.pig.deathChance)); posOffsetY = posOffsetY + 0.016;
-			
-			posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "weatherTemp Day: "..tostring(g_currentMission.environment.weatherTemperaturesDay[1])); posOffsetY = posOffsetY + 0.016;
-			renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "weatherTemp Night: "..tostring(g_currentMission.environment.weatherTemperaturesNight[1])); posOffsetY = posOffsetY + 0.016;
-		end;
 
-		renderOverlay(self.hud.overlay, posX - 0.005, posY - (posOffsetY), 0.12, (posOffsetY + 0.022));	
-		
-		-- clean up after us, text render after this will be affected otherwise.
-		setTextColor(1, 1, 1, 1);
-		setTextBold(false);
+		local numAnimals = self.animal[animalType].numAnimals[0];
+
+		if numAnimals > 0 then
+			setTextBold(true);
+			renderText(posX, posY - posOffsetY, fontSize, string.format(g_i18n:getText("LM_" .. string.upper(animalType) .. "_TITLE"), round(self.animals[animalType].condition)));
+			setTextBold(false);
+			posOffsetY = posOffsetY + 0.016;	
+
+			if not self.animals[animalType].states.water then
+				renderText(posX + 0.010, posY - posOffsetY, fontSize, g_i18n:getText("LM_NEEDS1"));	posOffsetY = posOffsetY + 0.016;
+			end;
+
+			if not self.animals[animalType].states.feed then
+				renderText(posX + 0.010, posY - posOffsetY, fontSize, g_i18n:getText("LM_NEEDS2")); posOffsetY = posOffsetY + 0.016;
+			end;
+
+			if not self.animals[animalType].states.bedding then
+				renderText(posX + 0.010, posY - posOffsetY, fontSize, g_i18n:getText("LM_NEEDS3").." ("..self.night_temp.." C)"); posOffsetY = posOffsetY + 0.016;
+			end;
+
+			if self.animals[animalType].states.dirty then
+				renderText(posX + 0.010, posY - posOffsetY, fontSize, g_i18n:getText("LM_NEEDS4")); posOffsetY = posOffsetY + 0.016;
+			end;
+
+			if self.animals[animalType].states.water and self.animals[animalType].states.feed and self.animals[animalType].states.bedding and not self.animals[animalType].states.dirty then
+				renderText(posX + 0.010, posY - posOffsetY, fontSize, g_i18n:getText("LM_NEEDS0")); posOffsetY = posOffsetY + 0.016;
+			end;		
+		end;
 	end;
+
+	if self.debug then
+		posOffsetY = posOffsetY + 0.008;
+		renderText(posX, posY - posOffsetY, fontSize - 0.003, "Debug Settings"); posOffsetY = posOffsetY + 0.016;
+		renderText(posX, posY - posOffsetY, fontSize - 0.003, "Update: "..math.ceil(self.updateMs/60000)); posOffsetY = posOffsetY + 0.016;
+
+		renderText(posX, posY - posOffsetY, fontSize - 0.003, "Chickens: "); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Rate: "..math.ceil(self.animals.chicken.breedingRate)); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Condition: "..math.ceil(self.animals.chicken.condition)); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Chance: "..math.ceil(self.animals.chicken.breedingChance)); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Death Chance: "..math.ceil(self.animals.chicken.deathChance)); posOffsetY = posOffsetY + 0.016;
+
+		renderText(posX, posY - posOffsetY, fontSize - 0.003, "Sheep: "); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Rate: "..math.ceil(self.animals.sheep.breedingRate)); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Condition: "..math.ceil(self.animals.sheep.condition)); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Chance: "..math.ceil(self.animals.sheep.breedingChance)); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Death Chance: "..math.ceil(self.animals.sheep.deathChance)); posOffsetY = posOffsetY + 0.016;
+
+		renderText(posX, posY - posOffsetY, fontSize - 0.003, "Cows: "); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Rate: "..math.ceil(self.animals.cow.breedingRate)); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Condition: "..math.ceil(self.animals.cow.condition)); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Chance: "..math.ceil(self.animals.cow.breedingChance)); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Death Chance: "..math.ceil(self.animals.cow.deathChance)); posOffsetY = posOffsetY + 0.016;
+
+		renderText(posX, posY - posOffsetY, fontSize - 0.003, "Pigs: "); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Rate: "..math.ceil(self.animals.pig.breedingRate)); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Condition: "..math.ceil(self.animals.pig.condition)); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Breeding Chance: "..math.ceil(self.animals.pig.breedingChance)); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "Death Chance: "..math.ceil(self.animals.pig.deathChance)); posOffsetY = posOffsetY + 0.016;
+
+		posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "weatherTemp Day: "..tostring(g_currentMission.environment.weatherTemperaturesDay[1])); posOffsetY = posOffsetY + 0.016;
+		renderText(posX + 0.004, posY - posOffsetY, fontSize - 0.003, "weatherTemp Night: "..tostring(g_currentMission.environment.weatherTemperaturesNight[1])); posOffsetY = posOffsetY + 0.016;
+	end;
+
+	renderOverlay(self.hud.overlay, posX - 0.005, posY - (posOffsetY), 0.12, (posOffsetY + 0.022));	
+
+	-- clean up after us, text render after this will be affected otherwise.
+	setTextColor(1, 1, 1, 1);
+	setTextBold(false);
 end;
 
 function livestockManager:loadSettings()
