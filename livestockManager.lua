@@ -1,15 +1,13 @@
 --
 -- Filename: livestockManager.lua
--- Author: Ian898 / CBModding
+-- Author: Ian898, CBModding, Xentro
 -- Date: 08/11/2016
 --
 
 livestockManager = {};
 livestockManager.version = ModsUtil.findModItemByModName(g_currentModName).version;
 livestockManager.modDirectory = g_currentModDirectory;
-
 livestockManager.IS_DEV = true;
-
 addModEventListener(livestockManager);
 
 function livestockManager:loadMap()
@@ -649,12 +647,14 @@ function livestockManager:draw()
 end;
 
 function livestockManager:loadSettings()
-	local path = ('%ssavegame%d/'):format(getUserProfileAppPath(), g_careerScreen.currentSavegame.savegameIndex);
-	local xml;
-	local file = path .. 'livestockManager.xml';
+	
+	--local path = ('%ssavegame%d/'):format(getUserProfileAppPath(), g_careerScreen.currentSavegame.savegameIndex);
+	--local xml;
+	--local file = path .. 'livestockManager.xml';
+	local xmlPath = g_currentMission.missionInfo.savegameDirectory .. "/livestockManager.xml";
 
-	if fileExists(file) then
-		xml = loadXMLFile("livestockManagerState", file, "livestockManager");
+	if fileExists(xmlPath) then
+		xml = loadXMLFile("livestockManagerState", xmlPath, "livestockManager");
 
 		-- Load Hud Positions
 		local hudPosX = getXMLFloat(xml, "livestockManager.hud.posX");
@@ -850,11 +850,13 @@ function livestockManager:loadSettings()
 end;
 
 function livestockManager:saveSettings()
-	local path = ('%ssavegame%d/'):format(getUserProfileAppPath(), g_careerScreen.currentSavegame.savegameIndex);
-	local xml;
-	local file = path .. 'livestockManager.xml';
+	--local path = ('%ssavegame%d/'):format(getUserProfileAppPath(), g_careerScreen.currentSavegame.savegameIndex);
+	--local xml;
+	--local file = path .. 'livestockManager.xml';
+	
+	local xmlPath = g_currentMission.missionInfo.savegameDirectory .. "/livestockManager.xml";
 
-	xml = createXMLFile("livestockManagerState", file, "livestockManager");
+	xml = createXMLFile("livestockManagerState", xmlPath, "livestockManager");
 
 	setXMLFloat(xml, "livestockManager.hud.posX", g_currentMission.livestockManager.hud.posX);
 	setXMLFloat(xml, "livestockManager.hud.posY", g_currentMission.livestockManager.hud.posY);
