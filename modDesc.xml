@@ -18,6 +18,7 @@
 	
 	<extraSourceFiles>
 		<sourceFile filename="livestockManager.lua" />
+		<sourceFile filename="livestockManagerEvent.lua" />
 	</extraSourceFiles>
 	
 	<inputBindings>
