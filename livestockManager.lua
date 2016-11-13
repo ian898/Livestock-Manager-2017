@@ -131,7 +131,7 @@ function livestockManager:update(dt)
 					end;
 				else
 					-- Player left
-					print("LivestockManager is letting you know that an player has left " .. numUsers);
+					-- print("LivestockManager is letting you know that an player has left " .. numUsers);
 				end;
 				
 				self.doWeNeedToSynchNum = numUsers;
@@ -139,8 +139,8 @@ function livestockManager:update(dt)
 		end;
 		
 		
-		-- if self.updateMs == -1 or self.updateMs >= 1200000 or forceUpdate then
-		if self.updateMs == -1 or self.updateMs >= 60000 or forceUpdate then
+		if self.updateMs == -1 or self.updateMs >= 1200000 or forceUpdate then
+		-- if self.updateMs == -1 or self.updateMs >= 60000 or forceUpdate then -- Needed more updates for testing
 			self.updateMs = 0; -- self.updateMs - 1200000;
 			
 			for _, animalType in ipairs(self.animals) do
@@ -570,6 +570,13 @@ function livestockManager:update(dt)
 				or self.animals[animalType].lastState.dirty ~= self.animals[animalType].states.dirty
 				or self.animals[animalType].lastState.condition ~= self.animals[animalType].condition 
 				or forceUpdate then
+					local eventType = 0; -- For more details take a look in the event file
+					if livestockManager.DEBUG then
+						print("preparing to write data to clients");
+					end;
+					if livestockManager.IS_DEV then
+						eventType = 1;
+					end;
 					self.animals[animalType].lastState.water 	 = self.animals[animalType].states.water;
 					self.animals[animalType].lastState.feed 	 = self.animals[animalType].states.feed;
 					self.animals[animalType].lastState.bedding 	 = self.animals[animalType].states.bedding;
@@ -577,7 +584,9 @@ function livestockManager:update(dt)
 					self.animals[animalType].lastState.condition = self.animals[animalType].condition;
 					
 					-- state have changed on server, send event to clients!
-					-- you could use g_server:broadcastEvent() I belive, look around how its used.
+					g_server:broadcastEvent(livestockManagerEvent:new(eventType, animalType, self.animals[animalType].lastState.water, self.animals[animalType].lastState.feed, self.animals[animalType].lastState.bedding, self.animals[animalType].lastState.dirty, self.animals[animalType].lastState.condition));
+					
+					-- Do note that we arent sending deathChance or breedingChance so you wont be able to debug them on MP if your an client
 				end;
 			end;
 		else
