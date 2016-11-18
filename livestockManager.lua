@@ -7,8 +7,8 @@
 livestockManager = {};
 livestockManager.version = ModsUtil.findModItemByModName(g_currentModName).version;
 livestockManager.modDirectory = g_currentModDirectory;
-livestockManager.IS_DEV = true;
-livestockManager.DEBUG = true;
+livestockManager.IS_DEV = false;
+livestockManager.DEBUG = false;
 
 addModEventListener(livestockManager);
 
@@ -141,9 +141,10 @@ function livestockManager:update(dt)
 		
 		if self.updateMs == -1 or self.updateMs >= 1200000 or forceUpdate then
 		-- if self.updateMs == -1 or self.updateMs >= 60000 or forceUpdate then -- Needed more updates for testing
-			self.updateMs = 0; -- self.updateMs - 1200000;
+			self.updateMs = 0;
 			
 			for _, animalType in ipairs(self.animals) do
+				
 				if self.animals[animalType].enableBreeding then
 					if g_currentMission.husbandries[animalType].animalDesc.birthRatePerDay ~= 0 then
 						g_currentMission.husbandries[animalType].animalDesc.birthRatePerDay = 0;
@@ -153,13 +154,10 @@ function livestockManager:update(dt)
 				local numAnimals = self.animal[animalType].numAnimals[0];
 				
 				if numAnimals > 0 then
-					-- You would be making your self an favor to slim this stuff down
-					-- There are no point in copy past the same line of code into 3 different animal types, it just get messy.
-					-- See self.animals[animalType].states.water for example
-					
-					--[[ How you can do it instead.
-					local gotFood;
-					local foodTypes;
+				
+					local isBreeding, isDeteriorating, isCold;
+					local hasFeed, hasWater, hasManure, hasBedding;					
+					local foodTypes, gotFood, gotWater, gotManure
 					
 					if animalType == "pig" then
 						foodTypes = {"FILLTYPE_WHEAT", 
@@ -187,148 +185,47 @@ function livestockManager:update(dt)
 						end;
 					end;
 					
-					-- Now we set the rest 
-					local hasFeed = gotFood ~= nil; -- This only have an value if we found something else its nil, "transformed" to bool value for lack of better word.
+					if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_WATER) > 0 then
+						gotWater = true;
+					end;
+					
+					if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_STRAW) > 0 then
+						gotBedding = true;
+					end;
+					
+					if self.animal[animalType].manureFillLevel ~= nil then
+						if self.animal[animalType].manureFillLevel >= self.animals[animalType].manureMax then
+							gotManure = true;
+						end;
+					end;
+					
+					hasFeed = gotFood ~= nil;
+					hasWater = gotWater ~= nil;					
+					hasBedding = gotBedding ~= nil;
+					hasManure = gotManure ~= nil;
+					
 					self.animals[animalType].states.feed = hasFeed;
+					self.animals[animalType].states.water = hasWater;					
 					
 					local state = hasFeed and hasWater;
 					isBreeding = state;
 					isDeteriorating = not state;
 					
-					-- and so on... you should get an gist of what you need or can do to reduce the "copy past" code.
+					if animalType == "cow" or animalType == "pig" then
 					
-					]]--
-					
-					
-					local isBreeding, isDeteriorating, isCold;
-					local hasFeed, hasWater, hasManure, hasBedding;				
-					local storageGrass, storageDryGrass, storageSilage, storageForage, storageStraw, storageManure, storageWater;
-					local storageWheat, storageBarley, storageOSR, storageSunflower, storageSoybean, storageMaize, storagePotato, storageBeet;
-
-					-- Get Storage
-					if animalType == "pig" then
-					
-						if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_WHEAT) > 0 then
-							storageWheat = true;
-						end;
+						local state = hasBedding and not hasManure;
+						isBreeding = state;
 						
-						if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_BARLEY) > 0 then
-							storageBarley = true;
-						end;
+						self.animals[animalType].states.bedding = hasBedding;
+						self.animals[animalType].states.dirty = hasManure;
 						
-						if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_RAPE) > 0 then
-							storageOSR = true;
-						end;
-						
-						if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_SUNFLOWER) > 0 then
-							storageSunflower = true;
-						end;
-						
-						if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_SOYBEAN) > 0 then
-							storageSoybean = true;
-						end;
-						
-						if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_MAIZE) > 0 then
-							storageMaize = true;
-						end;
-						
-						if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_POTATO) > 0 then
-							storagePotato = true;
-						end;
-						
-						if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_SUGARBEET) > 0 then
-							storageBeet = true;
-						end;
-						
-					end;
-					
-					if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_GRASS_WINDROW) > 0 then
-						storageGrass = true;
-					end;
-					
-					if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_DRYGRASS_WINDROW) > 0 then
-						storageDryGrass = true;
-					end;
-					
-					if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_SILAGE) > 0 then
-						storageSilage = true;
-					end;
-					
-					if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_POWERFOOD) > 0 then
-						storageForage = true;
-					end;
-					
-					if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_STRAW) > 0 then
-						storageStraw = true;
-					end;
-					
-					if self.animal[animalType].manureFillLevel ~= nil then
-						if self.animal[animalType].manureFillLevel >= self.animals[animalType].manureMax then
-							storageManure = true;
-						end;
-					end;
-					
-					if self.animal[animalType]:getFillLevel(FillUtil.FILLTYPE_WATER) > 0 then
-						storageWater = true;
-					end;				
-
-					
-					isCold = false;
-					
-					-- Pigs
-					if animalType == "pig" then
-						
-						if storageWater then
-							hasWater = true;
-							self.animals[animalType].states.water = true;
-						else
-							hasWater = false;
-							self.animals[animalType].states.water = false;
-						end;
-						
-						if storageWheat or storageBarley or storageOSR or storageSunflower or storageSoybean or storageMaize or storagePotato or storageBeet then
-							hasFeed = true;
-							self.animals[animalType].states.feed = true;
-						else
-							hasFeed = false;
-							self.animals[animalType].states.feed = false;
-						end;
-						
-						if storageStraw then
-							hasBedding = true;
-							self.animals[animalType].states.bedding = true;
-						else
-							hasBedding = false;
-							self.animals[animalType].states.bedding = false;
-						end;
-						
-						if storageManure then
-							hasManure = true;
-							self.animals[animalType].states.dirty = true;
-						else
-							hasManure = false;
-							self.animals[animalType].states.dirty = false;
-						end;
-						
-						if hasFeed and hasWater then
-							isBreeding = true;
-							isDeteriorating = false;
-						else
-							isBreeding = false;
-							isDeteriorating = true;
-						end;
-						
-						if hasBedding and not hasManure then
-							isBreeding = true;
-						else
-							isBreeding = false;
-						end;
+						isCold = false;
 						
 						local time_hour = g_currentMission.environment.currentHour;
 						
 						if self.night_temp == nil then
 							self.night_temp = g_currentMission.environment.weatherTemperaturesNight[1];
-						end;		
+						end;
 						
 						if time_hour >= 19 or time_hour <= 5 then
 							if self.night_temp <= 5 then
@@ -341,141 +238,22 @@ function livestockManager:update(dt)
 						else
 							self.night_temp = g_currentMission.environment.weatherTemperaturesNight[1];
 						end;
-						
 					end;
 					
-					-- Cows
-					if animalType == "cow" then
-						
-						if storageWater then
-							hasWater = true;
-							self.animals[animalType].states.water = true;
-						else
-							hasWater = false;
-							self.animals[animalType].states.water = false;
-						end;
-						
-						if storageGrass or storageDryGrass or storageSilage then
-							hasFeed = true;
-							self.animals[animalType].states.feed = true;
-						else
-							hasFeed = false;
-							self.animals[animalType].states.feed = false;
-						end;
-						
-						if storageStraw then
-							hasBedding = true;
-							self.animals[animalType].states.bedding = true;
-						else
-							hasBedding = false;
-							self.animals[animalType].states.bedding = false;
-						end;
-						
-						if storageManure then
-							hasManure = true;
-							self.animals[animalType].states.dirty = true;
-						else
-							hasManure = false;
-							self.animals[animalType].states.dirty = false;
-						end;
-						
-						if hasFeed and hasWater then
-							isBreeding = true;
-							isDeteriorating = false;
-						else
-							isBreeding = false;
-							isDeteriorating = true;
-						end;
-						
-						if hasBedding and not hasManure then
-							isBreeding = true;
-						else
-							isBreeding = false;
-						end;
-						
-						local time_hour = g_currentMission.environment.currentHour;
-						
-						if self.night_temp == nil then
-							self.night_temp = g_currentMission.environment.weatherTemperaturesNight[1];
-						end;		
-						
-						if time_hour >= 19 or time_hour <= 5 then
-							if self.night_temp <= 5 then
-								if not hasBedding then								
-									isBreeding = false;
-									isDeteriorating = true;
-									isCold = true;
-								end;
-							end;
-						else
-							self.night_temp = g_currentMission.environment.weatherTemperaturesNight[1];
-						end;
-						
-					end;
-					
-					-- Sheep
-					if animalType == "sheep" then
-						
-						if storageWater then
-							hasWater = true;
-							self.animals[animalType].states.water = true;
-						else
-							hasWater = false;
-							self.animals[animalType].states.water = false;
-						end;
-						
-						if storageGrass or storageDryGrass then
-							hasFeed = true;
-							self.animals[animalType].states.feed = true;
-						else
-							hasFeed = false;
-							self.animals[animalType].states.feed = false;
-						end;
-						
-						if hasFeed and hasWater then
-							isBreeding = true;
-							isDeteriorating = false;
-						else
-							isBreeding = false;
-							isDeteriorating = true;
-						end;
-						
-					end;
-					
-					-- Chickens
+					-- Chickens -- Work Around
 					if animalType == "chicken" then
-						
-						-- Maybe a mod will come out to reactivate chickens feed and water so leave it here.
-						--[[
-						
-						if storageWater then
-							hasWater = true;
-							self.animals[animalType].states.water = true;
-						else
-							hasWater = false;
-							self.animals[animalType].states.water = false;
-						end;
-						
-						if storageWheat then
-							hasFeed = true;
-							self.animals[animalType].states.feed = true;
-						else
-							hasFeed = false;
-							self.animals[animalType].states.feed = false;
-						end;
-						
-						]]--
 						
 						hasFeed = true;
 						hasWater = true;
 						
-						if hasFeed and hasWater then
-							isBreeding = true;
-							isDeteriorating = false;
-						else
-							isBreeding = false;
-							isDeteriorating = true;
-						end;					
+						self.animals[animalType].states.feed = hasFeed;
+						self.animals[animalType].states.water = hasWater;
+						self.animals[animalType].states.bedding = true;
+						self.animals[animalType].states.dirty = false;
+						
+						local state = hasFeed and hasWater;
+						isBreeding = state;
+						isDeteriorating = not state;						
 						
 					end;
 					
@@ -572,7 +350,7 @@ function livestockManager:update(dt)
 				or forceUpdate then
 					local eventType = 0; -- For more details take a look in the event file
 					if livestockManager.DEBUG then
-						print("preparing to write data to clients");
+						--print("preparing to write data to clients");
 					end;
 					if livestockManager.IS_DEV then
 						eventType = 1;
@@ -721,192 +499,41 @@ function livestockManager:deaths(animalType, numAnimals)
 	
 	if self.animals[animalType].enableDieing then
 		if numAnimals > death then
-			self.animal[animalType]:addAnimals(-math.ceil(death),0);
+			self.animal[animalType]:removeAnimals(math.ceil(death),0);
 		else
-			self.animal[animalType]:addAnimals(-1,0);
+			self.animal[animalType]:removeAnimals(1,0);
 		end;
 	end;
 	
 	self.animals[animalType].deathChance = 0;
 end;
 
-
-
 function livestockManager:loadSettings()
 	local xmlPath = g_currentMission.missionInfo.savegameDirectory .. "/livestockManager.xml";
 
 	if fileExists(xmlPath) then
 		xml = loadXMLFile("livestockManagerState", xmlPath, "livestockManager");
-
+		
 		-- Load Hud Positions
 		local hudPosX = getXMLFloat(xml, "livestockManager.hud.posX");
 		local hudPosY = getXMLFloat(xml, "livestockManager.hud.posY");
 		if hudPosX ~= nil and hudPosY ~= nil then
-			-- comment out for testing purpose, dont want the save file to override my new settings 
-			-- self.livestockManagerOverlay:setPosition(hudPosX, hudPosY);
+			self.livestockManagerOverlay:setPosition(hudPosX, hudPosY);
 		end;
-
-		-- Load Pig Settings
-		self:loadSettingAndSet(xml, "pig", "enableBreeding", "bool");
-		self:loadSettingAndSet(xml, "pig", "enableDieing", "float");
-		self:loadSettingAndSet(xml, "pig", "childLimit", "float");
-		self:loadSettingAndSet(xml, "pig", "breedingLimit", "float");
-		-- self:loadSettingAndSet(xml, "pig", "breedingRate", "float");
-		self:loadSettingAndSet(xml, "pig", "condition", "float");
-		-- self:loadSettingAndSet(xml, "pig", "breedingChance", "float");
-		-- self:loadSettingAndSet(xml, "pig", "deathChance", "float");
-		self:loadSettingAndSet(xml, "pig", "manureMax", "float");
-
-		-- These needs an nameing change to work with the new much slimmer approuch above.
-		local BreedingRate = getXMLFloat(xml, "livestockManager.pig.breedingDays");
-		if BreedingRate ~= nil then
-			self.animals.pig.breedingRate = BreedingRate * 96;
-		end;
-
-		local BreedingChance = getXMLFloat(xml, "livestockManager.pig.breedingTimer");
-		if BreedingChance ~= nil then
-			self.animals.pig.breedingChance = BreedingChance;
-		end;		
-
-		local DeathChance = getXMLFloat(xml, "livestockManager.pig.deathTimer");
-		if DeathChance ~= nil then
-			self.animals.pig.deathChance = DeathChance;
-		end;
-
 		
-		
-		-- Load Cow Settings
-
-		local EnableBreeding = getXMLBool(xml, "livestockManager.cow.enableBreeding");
-		if EnableBreeding ~= nil then
-			self.animals.cow.enableBreeding = EnableBreeding;
-		end;
-
-		local EnableDieing = getXMLBool(xml, "livestockManager.cow.enableDieing");
-		if EnableDieing ~= nil then
-			self.animals.cow.enableDieing = EnableDieing;
-		end;
-
-		local ChildLimit = getXMLFloat(xml, "livestockManager.cow.childLimit");
-		if ChildLimit ~= nil then
-			self.animals.cow.childLimit = ChildLimit;
-		end;
-
-		local BreedingLimit = getXMLFloat(xml, "livestockManager.cow.breedingLimit");
-		if BreedingLimit ~= nil then
-			self.animals.cow.breedingLimit = BreedingLimit;
-		end;
-
-		local BreedingRate = getXMLFloat(xml, "livestockManager.cow.breedingDays");
-		if BreedingRate ~= nil then
-			self.animals.cow.breedingRate = BreedingRate * 96;
-		end;
-
-		local Condition = getXMLFloat(xml, "livestockManager.cow.condition");
-		if Condition ~= nil then
-			self.animals.cow.condition = Condition;
-		end;
-
-		local BreedingChance = getXMLFloat(xml, "livestockManager.cow.breedingTimer");
-		if BreedingChance ~= nil then
-			self.animals.cow.breedingChance = BreedingChance;
+		for k, type in ipairs(self.animals) do
+			self:loadSettingAndSet(xml, type, "enableBreeding", "bool");
+			self:loadSettingAndSet(xml, type, "enableDieing", "bool");
+			self:loadSettingAndSet(xml, type, "childLimit", "float");
+			self:loadSettingAndSet(xml, type, "breedingLimit", "float");
+			self:loadSettingAndSet(xml, type, "breedingRate", "float");
+			self:loadSettingAndSet(xml, type, "condition", "float");
+			self:loadSettingAndSet(xml, type, "breedingChance", "float");
+			self:loadSettingAndSet(xml, type, "deathChance", "float");
+			if type == "cow" or type == "pig" then
+				self:loadSettingAndSet(xml, type, "manureMax", "float");
+			end;
 		end;		
-
-		local DeathChance = getXMLFloat(xml, "livestockManager.cow.deathTimer");
-		if DeathChance ~= nil then
-			self.animals.cow.deathChance = DeathChance;
-		end;
-
-		local ManureMax = getXMLFloat(xml, "livestockManager.cow.manureMax");
-		if ManureMax ~= nil then
-			self.animals.cow.manureMax = ManureMax;
-		end;
-
-		-- Load Sheep Settings
-
-		local EnableBreeding = getXMLBool(xml, "livestockManager.sheep.enableBreeding");
-		if EnableBreeding ~= nil then
-			self.animals.sheep.enableBreeding = EnableBreeding;
-		end;
-
-		local EnableDieing = getXMLBool(xml, "livestockManager.sheep.enableDieing");
-		if EnableDieing ~= nil then
-			self.animals.sheep.enableDieing = EnableDieing;
-		end;
-
-		local ChildLimit = getXMLFloat(xml, "livestockManager.sheep.childLimit");
-		if ChildLimit ~= nil then
-			self.animals.sheep.childLimit = ChildLimit;
-		end;
-
-		local BreedingLimit = getXMLFloat(xml, "livestockManager.sheep.breedingLimit");
-		if BreedingLimit ~= nil then
-			self.animals.sheep.breedingLimit = BreedingLimit;
-		end;
-
-		local BreedingRate = getXMLFloat(xml, "livestockManager.sheep.breedingDays");
-		if BreedingRate ~= nil then
-			self.animals.sheep.breedingRate = BreedingRate * 96;
-		end;
-
-		local Condition = getXMLFloat(xml, "livestockManager.sheep.condition");
-		if Condition ~= nil then
-			self.animals.sheep.condition = Condition;
-		end;		
-
-		local BreedingChance = getXMLFloat(xml, "livestockManager.sheep.breedingTimer");
-		if BreedingChance ~= nil then
-			self.animals.sheep.breedingChance = BreedingChance;
-		end;	
-
-		local DeathChance = getXMLFloat(xml, "livestockManager.sheep.deathTimer");
-		if DeathChance ~= nil then
-			self.animals.sheep.deathChance = DeathChance;
-		end;
-
-
-		-- Load Chicken Settings
-
-		local EnableBreeding = getXMLBool(xml, "livestockManager.chicken.enableBreeding");
-		if EnableBreeding ~= nil then
-			self.animals.chicken.enableBreeding = EnableBreeding;
-		end;
-
-		local EnableDieing = getXMLBool(xml, "livestockManager.chicken.enableDieing");
-		if EnableDieing ~= nil then
-			self.animals.chicken.enableDieing = EnableDieing;
-		end;
-
-		local ChildLimit = getXMLFloat(xml, "livestockManager.chicken.childLimit");
-		if ChildLimit ~= nil then
-			self.animals.chicken.childLimit = ChildLimit;
-		end;
-
-		local BreedingLimit = getXMLFloat(xml, "livestockManager.chicken.breedingLimit");
-		if BreedingLimit ~= nil then
-			self.animals.chicken.breedingLimit = BreedingLimit;
-		end;
-
-		local BreedingRate = getXMLFloat(xml, "livestockManager.chicken.breedingDays");
-		if BreedingRate ~= nil then
-			self.animals.chicken.breedingRate = BreedingRate * 96;
-		end;
-
-		local Condition = getXMLFloat(xml, "livestockManager.chicken.condition");
-		if Condition ~= nil then
-			self.animals.chicken.condition = Condition;
-		end;
-
-		local BreedingChance = getXMLFloat(xml, "livestockManager.chicken.breedingTimer");
-		if BreedingChance ~= nil then
-			self.animals.chicken.breedingChance = BreedingChance;
-		end;
-
-		local DeathChance = getXMLFloat(xml, "livestockManager.chicken.deathTimer");
-		if DeathChance ~= nil then
-			self.animals.chicken.deathChance = DeathChance;
-		end;
-
 	end;
 end;
 
@@ -914,55 +541,27 @@ function livestockManager:saveSettings()
 	local savegame = self.savegames[self.selectedIndex];
 	if savegame ~= nil then
 		local xml = createXMLFile("livestockManagerState", savegame.savegameDirectory .. "/livestockManager.xml", "livestockManager");
-
-		setXMLFloat(xml, "livestockManager.hud.posX", g_currentMission.livestockManagerOverlay.x);
-		setXMLFloat(xml, "livestockManager.hud.posY", g_currentMission.livestockManagerOverlay.y);
-
-		setXMLBool(xml, "livestockManager.pig.enableBreeding", g_currentMission.livestockManager.animals.pig.enableBreeding);
-		setXMLBool(xml, "livestockManager.pig.enableDieing", g_currentMission.livestockManager.animals.pig.enableDieing);
-		setXMLInt(xml, "livestockManager.pig.childLimit", g_currentMission.livestockManager.animals.pig.childLimit);
-		setXMLInt(xml, "livestockManager.pig.breedingLimit", g_currentMission.livestockManager.animals.pig.breedingLimit);
-		setXMLString(xml, "livestockManager.pig.breedingRate", string.format("%.2f",(g_currentMission.livestockManager.animals.pig.breedingRate / 96)));
-		setXMLInt(xml, "livestockManager.pig.condition", g_currentMission.livestockManager.animals.pig.condition);
-		setXMLInt(xml, "livestockManager.pig.breedingTimer", g_currentMission.livestockManager.animals.pig.breedingChance);
-		setXMLInt(xml, "livestockManager.pig.deathTimer", g_currentMission.livestockManager.animals.pig.deathChance);
-		setXMLInt(xml, "livestockManager.pig.manureMax", g_currentMission.livestockManager.animals.pig.manureMax);
-
-		setXMLBool(xml, "livestockManager.cow.enableBreeding", g_currentMission.livestockManager.animals.cow.enableBreeding);
-		setXMLBool(xml, "livestockManager.cow.enableDieing", g_currentMission.livestockManager.animals.cow.enableDieing);
-		setXMLInt(xml, "livestockManager.cow.childLimit", g_currentMission.livestockManager.animals.pig.childLimit);
-		setXMLInt(xml, "livestockManager.cow.breedingLimit", g_currentMission.livestockManager.animals.cow.breedingLimit);
-		setXMLString(xml, "livestockManager.cow.breedingDays", string.format("%.2f",(g_currentMission.livestockManager.animals.cow.breedingRate / 96)));
-		setXMLInt(xml, "livestockManager.cow.condition", g_currentMission.livestockManager.animals.cow.condition);
-		setXMLInt(xml, "livestockManager.cow.breedingTimer", g_currentMission.livestockManager.animals.cow.breedingChance);
-		setXMLInt(xml, "livestockManager.cow.deathTimer", g_currentMission.livestockManager.animals.cow.deathChance);
-		setXMLInt(xml, "livestockManager.cow.manureMax", g_currentMission.livestockManager.animals.cow.manureMax);
-
-		setXMLBool(xml, "livestockManager.sheep.enableBreeding", g_currentMission.livestockManager.animals.sheep.enableBreeding);
-		setXMLBool(xml, "livestockManager.sheep.enableDieing", g_currentMission.livestockManager.animals.sheep.enableDieing);
-		setXMLInt(xml, "livestockManager.sheep.childLimit", g_currentMission.livestockManager.animals.sheep.childLimit);
-		setXMLInt(xml, "livestockManager.sheep.breedingLimit", g_currentMission.livestockManager.animals.sheep.breedingLimit);
-		setXMLString(xml, "livestockManager.sheep.breedingDays", string.format("%.2f",(g_currentMission.livestockManager.animals.sheep.breedingRate / 96)));
-		setXMLInt(xml, "livestockManager.sheep.condition", g_currentMission.livestockManager.animals.sheep.condition);
-		setXMLInt(xml, "livestockManager.sheep.breedingTimer", g_currentMission.livestockManager.animals.sheep.breedingChance);
-		setXMLInt(xml, "livestockManager.sheep.deathTimer", g_currentMission.livestockManager.animals.sheep.deathChance);
-
-		setXMLBool(xml, "livestockManager.chicken.enableBreeding", g_currentMission.livestockManager.animals.chicken.enableBreeding);
-		setXMLBool(xml, "livestockManager.chicken.enableDieing", g_currentMission.livestockManager.animals.chicken.enableDieing);
-		setXMLInt(xml, "livestockManager.chicken.childLimit", g_currentMission.livestockManager.animals.chicken.childLimit);
-		setXMLInt(xml, "livestockManager.chicken.breedingLimit", g_currentMission.livestockManager.animals.chicken.breedingLimit);
-		setXMLString(xml, "livestockManager.chicken.breedingDays", string.format("%.2f",(g_currentMission.livestockManager.animals.chicken.breedingRate / 96)));
-		setXMLInt(xml, "livestockManager.chicken.condition", g_currentMission.livestockManager.animals.chicken.condition);
-		setXMLInt(xml, "livestockManager.chicken.breedingTimer", g_currentMission.livestockManager.animals.chicken.breedingChance);
-		setXMLInt(xml, "livestockManager.chicken.deathTimer", g_currentMission.livestockManager.animals.chicken.deathChance);
-
+		
+		setXMLFloat(xml, "livestockManager.hud.posX", g_currentMission.livestockManager.livestockManagerOverlay.x);
+		setXMLFloat(xml, "livestockManager.hud.posY", g_currentMission.livestockManager.livestockManagerOverlay.y);
+		for k, type in ipairs(g_currentMission.livestockManager.animals) do
+			setXMLBool(xml, "livestockManager.".. tostring(type) .. ".enableBreeding", g_currentMission.livestockManager.animals[type].enableBreeding);
+			setXMLBool(xml, "livestockManager.".. tostring(type) .. ".enableDieing", g_currentMission.livestockManager.animals[type].enableDieing);
+			setXMLInt(xml, "livestockManager.".. tostring(type) .. ".childLimit", g_currentMission.livestockManager.animals[type].childLimit);
+			setXMLInt(xml, "livestockManager.".. tostring(type) .. ".breedingLimit", g_currentMission.livestockManager.animals[type].breedingLimit);
+			setXMLString(xml, "livestockManager.".. tostring(type) .. ".breedingRate", string.format("%.2f",(g_currentMission.livestockManager.animals[type].breedingRate / 96)));
+			setXMLInt(xml, "livestockManager.".. tostring(type) .. ".condition", g_currentMission.livestockManager.animals[type].condition);
+			setXMLInt(xml, "livestockManager.".. tostring(type) .. ".breedingChance", g_currentMission.livestockManager.animals[type].breedingChance);
+			setXMLInt(xml, "livestockManager.".. tostring(type) .. ".deathChance", g_currentMission.livestockManager.animals[type].deathChance);
+			if type == "cow" or type == "pig" then
+				setXMLInt(xml, "livestockManager.".. tostring(type) .. ".manureMax", g_currentMission.livestockManager.animals[type].manureMax);
+			end;
+		end;
 		saveXMLFile(xml);
 		delete(xml);
 	end;
 end;
 g_careerScreen.saveSavegame = Utils.appendedFunction(g_careerScreen.saveSavegame, livestockManager.saveSettings);
-
-
 
 -- Convert our screen space from bottom left to top right
 function livestockManager.convertOurScreen(x, y)
@@ -995,15 +594,13 @@ function livestockManager:loadSettingAndSet(xml, name, setting, varType)
 	end;
 	
 	if value ~= nil then
-		if string.match(setting, "Rate") ~= nil then
+		if string.match(setting, "breedingRate") ~= nil then
 			value = value * 96;
 		end;
 		
 		self.animals[name][setting] = value;
 	end;
 end;
-
-
 
 -- Dev tools
 function livestockManager:LivestockManagerHudX(value)
