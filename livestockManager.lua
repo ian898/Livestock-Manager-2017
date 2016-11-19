@@ -374,7 +374,7 @@ function livestockManager:update(dt)
 end;
 
 function livestockManager:draw()
-	if not self.livestockManagerOverlay.visible then return end;
+	if not self.livestockManagerOverlay.visible or not g_currentMission.showHudEnv then return end;
 
 	local posX = self.livestockManagerOverlay.x;
 	local posY = self.livestockManagerOverlay.y;
