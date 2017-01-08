@@ -21,7 +21,9 @@ function advancedOwner:load(savegame)
 		
 		if vehicleOwner ~= nil then
 			self.advancedOwner.owner = vehicleOwner
-			self.nonTabbable = (self.advancedOwner.owner ~= "" and self.advancedOwner.owner ~= g_currentMission.users[g_currentMission.playerUserId].nickname)
+			if self.isClient then
+				self.nonTabbable = (self.advancedOwner.owner ~= "" and self.advancedOwner.owner ~= g_currentMission.users[g_currentMission.playerUserId].nickname)
+			end
 		end
 	end
 
@@ -30,6 +32,7 @@ end
 
 function advancedOwner:update(dt)
 	
+	--[[
 	if self.advancedOwner == nil then
 		self.advancedOwner = {}
 	end
@@ -38,8 +41,9 @@ function advancedOwner:update(dt)
 		g_client:getServerConnection():sendEvent(advancedOwnerRefreshEvent:new(self))		
 		self.advancedOwner.initialize = true
 	end
+	]]
 	
-	if g_currentMission:getIsServer() or g_currentMission.isMasterUser then
+	if self.isServer or g_currentMission.isMasterUser then
 		if self.isActive then
 			if self:getIsActiveForInput() then
 				if InputBinding.hasEvent(InputBinding.advancedOwner) then
@@ -55,6 +59,7 @@ function advancedOwner:update(dt)
 			end
 		end
 		
+		--[[
 		if self == g_currentMission.controlledVehicle then
 			if self.isActive then
 				if self.advancedOwner.owner == "" then
@@ -64,6 +69,7 @@ function advancedOwner:update(dt)
 				end
 			end
 		end
+		]]
 	end	
 end
 
@@ -91,7 +97,15 @@ function advancedOwner:overrideVehicleEnterRequestEvent(connection)
 	end
 end
 
-function advancedOwner:draw()end
+function advancedOwner:draw()
+	if self.isServer or g_currentMission.isMasterUser then
+		if self.advancedOwner.owner == "" then
+			g_currentMission:addHelpButtonText("Owner:".." ".."Everyone", InputBinding.advancedOwner)
+		else
+			g_currentMission:addHelpButtonText("Owner:".." "..Utils.getNoNil(self.advancedOwner.owner, "Everyone"), InputBinding.advancedOwner)
+		end
+	end
+end
 
 function advancedOwner:getSaveAttributesAndNodes()
 	local vehicleOwner = 'owner="' .. Utils.getNoNil(self.advancedOwner.owner) .. '"'
@@ -168,6 +182,7 @@ function advancedOwnerEvent:run(connection)
 	end;
 end;
 
+--[[
 advancedOwnerRefreshEvent = {};
 advancedOwnerRefreshEvent_mt = Class(advancedOwnerRefreshEvent, Event);
 InitEventClass(advancedOwnerRefreshEvent, "advancedOwnerRefreshEvent");
@@ -206,3 +221,4 @@ function advancedOwnerRefreshEvent:run(connection)
 		g_client:getServerConnection():sendEvent(advancedOwnerEvent:new(self.vehicle, self.vehicle.advancedOwner.owner))
 	end;
 end;
+]]
